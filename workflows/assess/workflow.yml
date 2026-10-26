@@ -2,7 +2,7 @@ schema_version: "1.0"
 workflow:
   id: "assess"
   name: "Idea Assessment Pipeline"
-  version: "1.0.0"
+  version: "1.0.1"
   author: "GitHub"
   description: "Runs intake → research → define → shape → decide with a verdict review gate before a manual /speckit.specify handoff"
 
@@ -23,6 +23,11 @@ inputs:
     type: string
     default: "auto"
     prompt: "Integration to use (e.g. claude, copilot, gemini; 'auto' uses the project's initialized integration)"
+  # A gate can only be answered if it names the input carrying the answer.
+  gate_review_verdict:
+    type: string
+    required: false
+    prompt: "approve or reject"
 
 steps:
   - id: intake
@@ -59,4 +64,5 @@ steps:
     type: gate
     message: "Review the assessment verdict. A go verdict is handed off manually with the specify command; this workflow stops here."
     options: [approve, reject]
+    verdict_input: gate_review_verdict
     on_reject: abort

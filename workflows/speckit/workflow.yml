@@ -2,7 +2,7 @@ schema_version: "1.0"
 workflow:
   id: "speckit"
   name: "Full SDD Cycle"
-  version: "1.0.1"
+  version: "1.0.2"
   author: "GitHub"
   description: "Runs specify → plan → tasks → implement with review gates"
 
@@ -35,6 +35,17 @@ inputs:
     type: string
     default: "auto"
     prompt: "Integration to use (e.g. claude, copilot, gemini; 'auto' uses the project's initialized integration)"
+  # A gate can only be answered if it names the input that carries the answer.
+  # Without these, ``resume -i`` has nothing to bind to and the run stays paused
+  # forever, which made every gate in this workflow a dead end on a fresh install.
+  gate_review_spec:
+    type: string
+    required: false
+    prompt: "approve or reject the spec"
+  gate_review_plan:
+    type: string
+    required: false
+    prompt: "approve or reject the plan"
 
 steps:
   - id: specify
@@ -47,6 +58,7 @@ steps:
     type: gate
     message: "Review the generated spec before planning."
     options: [approve, reject]
+    verdict_input: gate_review_spec
     on_reject: abort
 
   - id: plan
@@ -59,6 +71,7 @@ steps:
     type: gate
     message: "Review the plan before generating tasks."
     options: [approve, reject]
+    verdict_input: gate_review_plan
     on_reject: abort
 
   - id: tasks
